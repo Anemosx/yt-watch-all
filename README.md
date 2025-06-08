@@ -1,6 +1,6 @@
 # YouTube Channel Play All
 
-![Apache License 2.0](https://img.shields.io/badge/license-Apache--2.0-blue)
+![MIT license](https://img.shields.io/badge/license-MIT-blue)
 ![JavaScript](https://img.shields.io/badge/javascript-vanilla-yellow)
 [![Chrome](https://img.shields.io/badge/chrome-extension-brightgreen.svg)](https://developer.chrome.com/extensions)
 [![Firefox](https://img.shields.io/badge/firefox-addon-orange.svg)](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons)
