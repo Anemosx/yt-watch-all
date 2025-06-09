@@ -161,12 +161,20 @@
         debouncedSync();
     });
 
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
+    const initObserver = () => {
+        const targetNode = document.querySelector('ytd-page-manager') || document.body;
+        observer.observe(targetNode, {
+            childList: true,
+            subtree: true
+        });
 
-    setTimeout(debouncedSync, 1000);
+        setTimeout(debouncedSync, 1000);
+    };
+
+    if (document.body) {
+        initObserver();
+    } else {
+        document.addEventListener('DOMContentLoaded', initObserver);
+    }
 
 })();
-
