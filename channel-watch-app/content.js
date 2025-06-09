@@ -62,27 +62,9 @@
         return null;
     }
 
-    function setPlaylistUrl(button, channelId, videosShelf) {
+    function setPlaylistUrl(button, channelId) {
         const playlistId = 'UU' + channelId.substring(2);
-        let playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
-
-        // const firstVideo = videosShelf.querySelector('ytd-grid-video-renderer a#thumbnail');
-        // if (firstVideo && firstVideo.href) {
-        //     try {
-        //         const videoUrl = new URL(firstVideo.href);
-        //         const videoId = videoUrl.searchParams.get('v');
-        //         if (videoId) {
-        //             playlistUrl = `https://www.youtube.com/watch?v=${videoId}&list=${playlistId}`;
-        //         }
-        //     } catch (e) {
-        //         console.error("Watch All Extension: Could not parse video URL", e);
-        //     }
-        // }
-
-        // if (!playlistUrl) {
-        //     playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
-        // }
-
+        const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
         button.href = playlistUrl;
     }
 
@@ -101,58 +83,65 @@
 
     const BUTTON_ID = 'play-all-videos-button';
 
+    function createPlayAllButton() {
+        const button = document.createElement('a');
+        button.id = BUTTON_ID;
+        button.className = 'yt-spec-button-shape-next yt-spec-button-shape-next--text yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-m yt-spec-button-shape-next--icon-leading';
+        button.style.alignSelf = 'center';
+
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'yt-spec-button-shape-next__icon';
+        iconDiv.setAttribute('aria-hidden', 'true');
+        iconDiv.style.width = '24px';
+        iconDiv.style.height = '24px';
+        iconDiv.style.fill = 'currentColor';
+        iconDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: inherit; width: 100%; height: 100%;"><path d="m7 4 12 8-12 8V4z"></path></svg>`;
+
+        const textDiv = document.createElement('div');
+        textDiv.className = 'yt-spec-button-shape-next__button-text-content';
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'yt-core-attributed-string yt-core-attributed-string--white-space-no-wrap';
+        textSpan.setAttribute('role', 'text');
+        textSpan.textContent = 'Play all';
+        textDiv.appendChild(textSpan);
+
+        button.appendChild(iconDiv);
+        button.appendChild(textDiv);
+
+        return button;
+    }
+
     function syncPlayAllButton() {
-        const videosShelf = findVideosShelf();
         let button = document.getElementById(BUTTON_ID);
 
-        if (!videosShelf) {
+        // Find possible locations
+        const videosShelfH2 = findVideosShelf()?.querySelector('h2.style-scope.ytd-shelf-renderer');
+        const videosTabSelected = document.querySelector('yt-tab-shape[tab-title="Videos"][aria-selected="true"]');
+        const chipBar = videosTabSelected ? document.querySelector('ytd-feed-filter-chip-bar-renderer #chips-content') : null;
+
+        const buttonParent = chipBar || videosShelfH2;
+
+        if (!buttonParent) {
             if (button) button.remove();
             return;
         }
 
         const channelId = getChannelId();
-
         if (!channelId || !channelId.startsWith('UC')) {
             if (button) button.remove();
             return;
         }
 
         if (!button) {
-            const shelfTitleH2 = videosShelf.querySelector('h2.style-scope.ytd-shelf-renderer');
-            if (!shelfTitleH2) return;
-
-            if (shelfTitleH2.querySelector(`#${BUTTON_ID}`)) return;
-
-            button = document.createElement('a');
-            button.id = BUTTON_ID;
-            button.className = 'yt-spec-button-shape-next yt-spec-button-shape-next--text yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-m yt-spec-button-shape-next--icon-leading';
-            setPlaylistUrl(button, channelId, videosShelf);
-            button.style.alignSelf = 'center';
-
-            const iconDiv = document.createElement('div');
-            iconDiv.className = 'yt-spec-button-shape-next__icon';
-            iconDiv.setAttribute('aria-hidden', 'true');
-            iconDiv.style.width = '24px';
-            iconDiv.style.height = '24px';
-            iconDiv.style.fill = 'currentColor';
-            iconDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" style="pointer-events: none; display: inherit; width: 100%; height: 100%;"><path d="m7 4 12 8-12 8V4z"></path></svg>`;
-
-            const textDiv = document.createElement('div');
-            textDiv.className = 'yt-spec-button-shape-next__button-text-content';
-
-            const textSpan = document.createElement('span');
-            textSpan.className = 'yt-core-attributed-string yt-core-attributed-string--white-space-no-wrap';
-            textSpan.setAttribute('role', 'text');
-            textSpan.textContent = 'Play all';
-            textDiv.appendChild(textSpan);
-
-            button.appendChild(iconDiv);
-            button.appendChild(textDiv);
-
-            shelfTitleH2.appendChild(button);
+            button = createPlayAllButton();
         }
 
-        setPlaylistUrl(button, channelId, videosShelf);
+        if (button.parentElement !== buttonParent) {
+            buttonParent.appendChild(button);
+        }
+
+        setPlaylistUrl(button, channelId);
     }
 
     const debouncedSync = debounce(syncPlayAllButton, 500);
@@ -162,7 +151,7 @@
     });
 
     const initObserver = () => {
-        const targetNode = document.querySelector('ytd-page-manager') || document.body;
+        const targetNode = document.querySelector('#page-header') || document.querySelector('ytd-page-manager') || document.body;
         observer.observe(targetNode, {
             childList: true,
             subtree: true
