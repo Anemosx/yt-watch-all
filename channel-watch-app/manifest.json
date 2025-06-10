@@ -22,12 +22,6 @@
             "run_at": "document_idle"
         }
     ],
-    "permissions": [
-        "storage"
-    ],
     "homepage_url": "https://github.com/Anemosx/yt-watch-all",
-    "minimum_chrome_version": "88",
-    "content_security_policy": {
-        "extension_pages": "script-src 'self'; object-src 'self'"
-    }
+    "minimum_chrome_version": "88"
 }
